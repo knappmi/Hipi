@@ -1,0 +1,27 @@
+{
+  "id": "my-plugin",
+  "name": "My Plugin",
+  "version": "1.0.0",
+  "description": "A sample plugin for Home Assistant Platform",
+  "author": "Your Name",
+  "image": "my-plugin:latest",
+  "dockerfile": "Dockerfile",
+  "cpu_limit": 0.5,
+  "memory_limit": "512m",
+  "api_port": 8000,
+  "health_check_path": "/health",
+  "command_endpoint": "/command",
+  "status_endpoint": "/status",
+  "config_endpoint": "/config",
+  "env_vars": {},
+  "volumes": [],
+  "depends_on": [],
+  "network_access": true,
+  "device_access": false,
+  "price": 0.0,
+  "category": "utilities",
+  "tags": ["sample", "template"]
+}
+
+
+

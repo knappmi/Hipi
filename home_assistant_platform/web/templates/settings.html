@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Home Assistant Platform{% endblock %}
+
+{% block content %}
+<div class="settings-page">
+    <h2>Settings</h2>
+    
+    <div class="settings-section">
+        <h3>License</h3>
+        <div class="setting-item">
+            <label>License Key:</label>
+            <input type="text" id="license-key" placeholder="Enter license key">
+            <button class="btn btn-primary" onclick="updateLicense()">Update License</button>
+        </div>
+        <div class="setting-item">
+            <label>License Tier:</label>
+            <span id="license-tier">Trial</span>
+        </div>
+    </div>
+    
+    <div class="settings-section">
+        <h3>System Resources</h3>
+        <div class="setting-item">
+            <label>Max CPU per Plugin:</label>
+            <input type="number" id="max-cpu" value="0.5" step="0.1" min="0.1" max="1.0">
+            <button class="btn btn-primary" onclick="updateResourceLimits()">Update</button>
+        </div>
+        <div class="setting-item">
+            <label>Max Memory per Plugin:</label>
+            <input type="text" id="max-memory" value="512m">
+            <button class="btn btn-primary" onclick="updateResourceLimits()">Update</button>
+        </div>
+    </div>
+    
+    <div class="settings-section">
+        <h3>Network</h3>
+        <div class="setting-item">
+            <label>MQTT Broker:</label>
+            <input type="text" id="mqtt-broker" placeholder="localhost">
+        </div>
+        <div class="setting-item">
+            <label>MQTT Port:</label>
+            <input type="number" id="mqtt-port" value="1883">
+        </div>
+    </div>
+</div>
+
+<script>
+function updateLicense() {
+    const licenseKey = document.getElementById('license-key').value;
+    fetch('/api/v1/license', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ license_key: licenseKey })
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message || 'License updated');
+        if (data.tier) {
+            document.getElementById('license-tier').textContent = data.tier;
+        }
+    });
+}
+
+function updateResourceLimits() {
+    const maxCpu = document.getElementById('max-cpu').value;
+    const maxMemory = document.getElementById('max-memory').value;
+    
+    fetch('/api/v1/settings/resources', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ max_cpu: maxCpu, max_memory: maxMemory })
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message || 'Resource limits updated');
+    });
+}
+</script>
+{% endblock %}
+

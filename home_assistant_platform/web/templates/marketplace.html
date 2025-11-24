@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Marketplace - Home Assistant Platform{% endblock %}
+
+{% block content %}
+<div class="marketplace-page">
+    <h2>Plugin Marketplace</h2>
+    
+    <div class="marketplace-filters">
+        <input type="text" id="search-input" placeholder="Search plugins..." onkeyup="searchPlugins()">
+        <select id="category-filter" onchange="searchPlugins()">
+            <option value="">All Categories</option>
+            <option value="automation">Automation</option>
+            <option value="security">Security</option>
+            <option value="entertainment">Entertainment</option>
+            <option value="utilities">Utilities</option>
+        </select>
+        <label>
+            <input type="checkbox" id="free-only" onchange="searchPlugins()"> Free Only
+        </label>
+    </div>
+    
+    <div id="marketplace-list" class="marketplace-list">
+        <p>Loading marketplace...</p>
+    </div>
+</div>
+
+<script>
+function searchPlugins() {
+    const search = document.getElementById('search-input').value;
+    const category = document.getElementById('category-filter').value;
+    const freeOnly = document.getElementById('free-only').checked;
+    
+    let url = '/api/v1/marketplace/plugins?';
+    if (search) url += `search=${encodeURIComponent(search)}&`;
+    if (category) url += `category=${encodeURIComponent(category)}&`;
+    if (freeOnly) url += `free_only=true&`;
+    
+    fetch(url)
+        .then(response => response.json())
+        .then(plugins => {
+            const container = document.getElementById('marketplace-list');
+            if (plugins.length === 0) {
+                container.innerHTML = '<p>No plugins found</p>';
+                return;
+            }
+            
+            container.innerHTML = plugins.map(plugin => `
+                <div class="marketplace-card">
+                    <div class="marketplace-header">
+                        <h3>${plugin.name}</h3>
+                        <span class="plugin-price">${plugin.is_free ? 'FREE' : '$' + plugin.price}</span>
+                    </div>
+                    <p class="plugin-description">${plugin.description || 'No description'}</p>
+                    <div class="plugin-meta">
+                        <span>Author: ${plugin.author}</span>
+                        <span>Downloads: ${plugin.downloads}</span>
+                        ${plugin.average_rating > 0 ? `<span>⭐ ${plugin.average_rating.toFixed(1)}</span>` : ''}
+                    </div>
+                    <div class="marketplace-actions">
+                        <button class="btn btn-primary" onclick="installPlugin('${plugin.id}')">Install</button>
+                        ${!plugin.is_free ? `<button class="btn btn-success" onclick="purchasePlugin('${plugin.id}')">Purchase</button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        });
+}
+
+function installPlugin(pluginId) {
+    fetch(`/api/v1/marketplace/plugins/${pluginId}/install`, { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message || 'Plugin installation started');
+            if (data.success) {
+                setTimeout(() => window.location.href='/plugins', 2000);
+            }
+        });
+}
+
+function purchasePlugin(pluginId) {
+    if (confirm('Purchase this plugin?')) {
+        fetch(`/api/v1/marketplace/plugins/${pluginId}/purchase`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message || 'Purchase processing...');
+            });
+    }
+}
+
+// Load marketplace on page load
+searchPlugins();
+</script>
+{% endblock %}
+

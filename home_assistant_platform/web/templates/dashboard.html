@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Home Assistant Platform{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <h2>Dashboard</h2>
+    
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>System Status</h3>
+            <p class="stat-value" id="system-status">Loading...</p>
+        </div>
+        <div class="stat-card">
+            <h3>Installed Plugins</h3>
+            <p class="stat-value" id="plugin-count">0</p>
+        </div>
+        <div class="stat-card">
+            <h3>Active Plugins</h3>
+            <p class="stat-value" id="active-plugins">0</p>
+        </div>
+        <div class="stat-card">
+            <h3>License Tier</h3>
+            <p class="stat-value" id="license-tier">Trial</p>
+        </div>
+    </div>
+    
+    <div class="dashboard-section">
+        <h3>Recent Activity</h3>
+        <div id="activity-log" class="activity-log">
+            <p>No recent activity</p>
+        </div>
+    </div>
+    
+    <div class="dashboard-section">
+        <h3>Quick Actions</h3>
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="window.location.href='/plugins'">Manage Plugins</button>
+            <button class="btn btn-primary" onclick="window.location.href='/marketplace'">Browse Marketplace</button>
+            <button class="btn btn-secondary" onclick="window.location.href='/voice'">Voice Settings</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Load dashboard data
+    fetch('/api/status')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('system-status').textContent = data.status;
+        });
+    
+    // Load plugin stats
+    fetch('/api/v1/plugins')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('plugin-count').textContent = data.length || 0;
+            const active = data.filter(p => p.status === 'running').length;
+            document.getElementById('active-plugins').textContent = active;
+        });
+</script>
+{% endblock %}
+

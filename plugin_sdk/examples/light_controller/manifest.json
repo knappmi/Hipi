@@ -1,0 +1,29 @@
+{
+  "id": "light-controller",
+  "name": "Light Controller",
+  "version": "1.0.0",
+  "description": "Control smart lights via MQTT",
+  "author": "Platform Team",
+  "image": "light-controller:latest",
+  "dockerfile": "Dockerfile",
+  "cpu_limit": 0.3,
+  "memory_limit": "256m",
+  "api_port": 8000,
+  "health_check_path": "/health",
+  "command_endpoint": "/command",
+  "status_endpoint": "/status",
+  "config_endpoint": "/config",
+  "env_vars": {
+    "MQTT_BROKER": "mqtt://localhost:1883"
+  },
+  "volumes": [],
+  "depends_on": [],
+  "network_access": true,
+  "device_access": false,
+  "price": 0.0,
+  "category": "automation",
+  "tags": ["lights", "mqtt", "automation"]
+}
+
+
+

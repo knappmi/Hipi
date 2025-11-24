@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}Voice Settings - Home Assistant Platform{% endblock %}
+
+{% block content %}
+<div class="voice-page">
+    <h2>Voice Settings</h2>
+    
+    <div class="settings-section">
+        <h3>Voice Processing</h3>
+        <div class="setting-item">
+            <label>
+                <input type="checkbox" id="voice-enabled" checked> Enable Voice Processing
+            </label>
+        </div>
+        <div class="setting-item">
+            <label>Wake Word:</label>
+            <input type="text" id="wake-word" value="hey_assistant">
+        </div>
+        <div class="setting-item">
+            <label>
+                <input type="checkbox" id="conversation-mode"> Enable Conversation Mode
+            </label>
+            <small style="display: block; color: #666; margin-top: 5px;">
+                In conversation mode, the assistant stays awake after the wake word for fluid conversation.
+                You can also toggle it by saying "enable conversation mode" or "disable conversation mode".
+            </small>
+        </div>
+    </div>
+    
+    <div class="settings-section">
+        <h3>Speech-to-Text</h3>
+        <div class="setting-item">
+            <label>STT Engine:</label>
+            <select id="stt-engine">
+                <option value="vosk">Vosk (Local)</option>
+                <option value="openai">OpenAI (Cloud)</option>
+            </select>
+        </div>
+        <div class="setting-item" id="openai-key-section" style="display: none;">
+            <label>OpenAI API Key:</label>
+            <input type="password" id="openai-key" placeholder="Enter API key">
+        </div>
+    </div>
+    
+    <div class="settings-section">
+        <h3>Text-to-Speech</h3>
+        <div class="setting-item">
+            <label>TTS Engine:</label>
+            <select id="tts-engine">
+                <option value="pyttsx3">pyttsx3 (Local)</option>
+                <option value="openai">OpenAI (Cloud)</option>
+            </select>
+        </div>
+        <div class="setting-item" id="openai-voice-section" style="display: none;">
+            <label>OpenAI Voice:</label>
+            <select id="openai-tts-voice">
+                <option value="nova">Nova (Recommended - Natural Female)</option>
+                <option value="shimmer">Shimmer (Natural Female)</option>
+                <option value="alloy">Alloy (Neutral)</option>
+                <option value="echo">Echo (Male)</option>
+                <option value="fable">Fable (British Male)</option>
+                <option value="onyx">Onyx (Deep Male)</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="settings-section">
+        <button class="btn btn-primary btn-large" onclick="updateVoiceSettings()" style="width: 100%; padding: 12px; font-size: 16px; margin-top: 20px;">
+            Update All Settings
+        </button>
+    </div>
+    
+    <div class="voice-test">
+        <h3>Test Voice</h3>
+        <button class="btn btn-primary" onclick="testVoice()">Test TTS</button>
+        <input type="text" id="test-text" placeholder="Enter text to speak" value="Hello, this is a test">
+    </div>
+</div>
+
+<script>
+document.getElementById('stt-engine').addEventListener('change', function() {
+    document.getElementById('openai-key-section').style.display = 
+        this.value === 'openai' ? 'block' : 'none';
+});
+
+document.getElementById('tts-engine').addEventListener('change', function() {
+    const isOpenAI = this.value === 'openai';
+    document.getElementById('openai-key-section').style.display = isOpenAI ? 'block' : 'none';
+    document.getElementById('openai-voice-section').style.display = isOpenAI ? 'block' : 'none';
+});
+
+function updateVoiceSettings(event) {
+    const settings = {
+        voice_enabled: document.getElementById('voice-enabled').checked,
+        wake_word: document.getElementById('wake-word').value,
+        stt_engine: document.getElementById('stt-engine').value,
+        tts_engine: document.getElementById('tts-engine').value,
+        openai_api_key: document.getElementById('openai-key').value || undefined,
+        openai_tts_voice: document.getElementById('openai-tts-voice') ? document.getElementById('openai-tts-voice').value : undefined,
+        conversation_mode: document.getElementById('conversation-mode').checked
+    };
+    
+    // Show loading state
+    const btn = event ? event.target : document.querySelector('button[onclick="updateVoiceSettings()"]');
+    const originalText = btn.textContent;
+    btn.textContent = 'Updating...';
+    btn.disabled = true;
+    
+    fetch('/api/v1/voice/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settings)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Voice settings updated successfully!');
+            // Reload settings to show current values
+            loadVoiceSettings();
+        } else {
+            alert('Error: ' + (data.error || data.message || 'Failed to update settings'));
+        }
+    })
+    .catch(error => {
+        alert('Error updating settings: ' + error.message);
+    })
+    .finally(() => {
+        btn.textContent = originalText;
+        btn.disabled = false;
+    });
+}
+
+function loadVoiceSettings() {
+    fetch('/api/v1/voice/settings')
+        .then(response => response.json())
+        .then(data => {
+            if (data.wake_word) {
+                document.getElementById('wake-word').value = data.wake_word;
+            }
+            if (data.stt_engine) {
+                document.getElementById('stt-engine').value = data.stt_engine;
+                // Trigger change to show/hide OpenAI sections
+                document.getElementById('stt-engine').dispatchEvent(new Event('change'));
+            }
+            if (data.tts_engine) {
+                document.getElementById('tts-engine').value = data.tts_engine;
+                // Trigger change to show/hide OpenAI sections
+                document.getElementById('tts-engine').dispatchEvent(new Event('change'));
+            }
+            if (data.openai_tts_voice && document.getElementById('openai-tts-voice')) {
+                document.getElementById('openai-tts-voice').value = data.openai_tts_voice;
+            }
+            if (data.conversation_mode !== undefined) {
+                document.getElementById('conversation-mode').checked = data.conversation_mode;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading settings:', error);
+        });
+}
+
+// Load settings on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadVoiceSettings();
+});
+
+function testVoice() {
+    const text = document.getElementById('test-text').value;
+    fetch('/api/v1/voice/speak', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: text })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Voice test completed');
+        } else {
+            alert('Voice test failed: ' + (data.error || 'Unknown error'));
+        }
+    });
+}
+</script>
+{% endblock %}
+

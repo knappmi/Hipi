@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Plugins - Home Assistant Platform{% endblock %}
+
+{% block content %}
+<div class="plugins-page">
+    <h2>Installed Plugins</h2>
+    
+    <div class="plugin-controls">
+        <button class="btn btn-primary" onclick="refreshPlugins()">Refresh</button>
+        <button class="btn btn-success" onclick="window.location.href='/marketplace'">Install from Marketplace</button>
+    </div>
+    
+    <div id="plugins-list" class="plugins-list">
+        <p>Loading plugins...</p>
+    </div>
+</div>
+
+<script>
+function refreshPlugins() {
+    fetch('/api/v1/plugins')
+        .then(response => response.json())
+        .then(plugins => {
+            const container = document.getElementById('plugins-list');
+            if (plugins.length === 0) {
+                container.innerHTML = '<p>No plugins installed</p>';
+                return;
+            }
+            
+            container.innerHTML = plugins.map(plugin => `
+                <div class="plugin-card">
+                    <div class="plugin-header">
+                        <h3>${plugin.name}</h3>
+                        <span class="plugin-version">v${plugin.version}</span>
+                    </div>
+                    <p class="plugin-description">${plugin.description || 'No description'}</p>
+                    <div class="plugin-meta">
+                        <span>Author: ${plugin.author}</span>
+                        <span class="status-badge status-${plugin.status}">${plugin.status}</span>
+                    </div>
+                    <div class="plugin-actions">
+                        ${plugin.status === 'running' 
+                            ? `<button class="btn btn-warning" onclick="stopPlugin('${plugin.id}')">Stop</button>`
+                            : `<button class="btn btn-success" onclick="startPlugin('${plugin.id}')">Start</button>`
+                        }
+                        <button class="btn btn-danger" onclick="uninstallPlugin('${plugin.id}')">Uninstall</button>
+                        <button class="btn btn-info" onclick="viewPluginLogs('${plugin.id}')">Logs</button>
+                    </div>
+                </div>
+            `).join('');
+        });
+}
+
+function startPlugin(pluginId) {
+    fetch(`/api/v1/plugins/${pluginId}/start`, { method: 'POST' })
+        .then(() => refreshPlugins());
+}
+
+function stopPlugin(pluginId) {
+    fetch(`/api/v1/plugins/${pluginId}/stop`, { method: 'POST' })
+        .then(() => refreshPlugins());
+}
+
+function uninstallPlugin(pluginId) {
+    if (confirm(`Are you sure you want to uninstall ${pluginId}?`)) {
+        fetch(`/api/v1/plugins/${pluginId}`, { method: 'DELETE' })
+            .then(() => refreshPlugins());
+    }
+}
+
+function viewPluginLogs(pluginId) {
+    window.open(`/api/v1/plugins/${pluginId}/logs`, '_blank');
+}
+
+// Load plugins on page load
+refreshPlugins();
+</script>
+{% endblock %}
+

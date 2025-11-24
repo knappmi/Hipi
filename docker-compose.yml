@@ -1,0 +1,52 @@
+services:
+  platform:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: home-assistant-platform
+    restart: unless-stopped
+    volumes:
+      - ./home_assistant_platform:/app/home_assistant_platform
+      - ./plugins:/app/plugins
+      - ./config:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Audio device passthrough
+      - /dev/snd:/dev/snd
+      # PulseAudio socket (if using PulseAudio) - user ID 1000
+      - /run/user/1000/pulse:/run/user/1000/pulse:ro
+    ports:
+      - "8000:8000"  # FastAPI
+      - "5000:5000"  # Flask Web UI
+    environment:
+      - ENV_FILE=/app/config/.env
+      # Audio environment variables
+      - PULSE_RUNTIME_PATH=/run/user/1000/pulse
+      - PULSE_SERVER=unix:/run/user/1000/pulse/native
+    devices:
+      # Audio devices
+      - /dev/snd:/dev/snd
+    networks:
+      - platform-network
+    # Run as root to access audio devices (or use user: "1000:29" if permissions are set correctly)
+    # user: "1000:29"  # Uncomment if you want to run as non-root
+
+  marketplace-db:
+    image: postgres:15-alpine
+    container_name: marketplace-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: marketplace
+      POSTGRES_USER: marketplace_user
+      POSTGRES_PASSWORD: ${MARKETPLACE_DB_PASSWORD:-changeme}
+    volumes:
+      - marketplace-data:/var/lib/postgresql/data
+    networks:
+      - platform-network
+
+networks:
+  platform-network:
+    driver: bridge
+
+volumes:
+  marketplace-data:
+
