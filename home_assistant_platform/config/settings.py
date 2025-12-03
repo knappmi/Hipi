@@ -42,6 +42,14 @@ class Settings(BaseSettings):
     openai_tts_voice: str = Field(default="nova", env="OPENAI_TTS_VOICE")  # Options: alloy, echo, fable, onyx, nova, shimmer
     conversation_mode: bool = Field(default=False, env="CONVERSATION_MODE")  # Enable fluid conversation mode
     
+    # Enhanced Voice Features
+    language: str = Field(default="en", env="LANGUAGE")  # Language code (en, es, fr, de, etc.)
+    elevenlabs_api_key: Optional[str] = Field(default=None, env="ELEVENLABS_API_KEY")
+    elevenlabs_enabled: bool = Field(default=False, env="ELEVENLABS_ENABLED")
+    vad_enabled: bool = Field(default=True, env="VAD_ENABLED")  # Voice Activity Detection
+    vad_energy_threshold: float = Field(default=0.01, env="VAD_ENERGY_THRESHOLD")
+    vad_silence_duration: float = Field(default=0.5, env="VAD_SILENCE_DURATION")
+    
     # Plugin System
     plugins_dir: str = Field(default="/app/plugins", env="PLUGINS_DIR")
     plugin_max_cpu: float = Field(default=0.5, env="PLUGIN_MAX_CPU")

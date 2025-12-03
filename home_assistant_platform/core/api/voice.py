@@ -5,8 +5,14 @@ from fastapi import APIRouter, Request, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 
+# Import enhanced voice features
+from home_assistant_platform.core.api.voice_enhanced import router as voice_enhanced_router
+
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+# Include enhanced voice features
+router.include_router(voice_enhanced_router, prefix="/enhanced", tags=["voice-enhanced"])
 
 
 def get_voice_manager(request: Request):

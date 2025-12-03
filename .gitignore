@@ -7,25 +7,14 @@ __pycache__/
 env/
 venv/
 ENV/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
+.venv
 
-# Environment
-.env
-.env.local
+# Data files
+*.db
+*.log
+*.zip
+data/backups/
+data/logs/
 
 # IDE
 .vscode/
@@ -34,28 +23,10 @@ wheels/
 *.swo
 *~
 
-# Platform data
-platform/data/
-plugins/
-*.log
-*.db
-*.db-journal
-
-# Docker
-*.pid
-*.seed
-*.pid.lock
-
 # OS
 .DS_Store
 Thumbs.db
 
-# Temporary files
-*.tmp
-*.temp
-*.bak
-
-# Vosk models (large files)
-vosk_models/
-vosk-model-*.zip
-
+# Project specific
+vosk-model-*/
+*.pid

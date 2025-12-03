@@ -90,6 +90,89 @@ class IntentProcessor:
                 re.compile(r"turn off conversation mode", re.IGNORECASE),
                 re.compile(r"conversation mode", re.IGNORECASE),
             ],
+            "search": [
+                re.compile(r"search for (.+)", re.IGNORECASE),
+                re.compile(r"search (.+)", re.IGNORECASE),
+                re.compile(r"look up (.+)", re.IGNORECASE),
+                re.compile(r"lookup (.+)", re.IGNORECASE),
+                re.compile(r"find (.+)", re.IGNORECASE),
+                re.compile(r"google (.+)", re.IGNORECASE),
+                re.compile(r"tell me about (.+)", re.IGNORECASE),
+                re.compile(r"what is (.+)", re.IGNORECASE),
+                re.compile(r"who is (.+)", re.IGNORECASE),
+                re.compile(r"wikipedia (.+)", re.IGNORECASE),
+            ],
+            "set_reminder": [
+                re.compile(r"remind me to (.+)", re.IGNORECASE),
+                re.compile(r"remind me (.+)", re.IGNORECASE),
+                re.compile(r"set reminder (.+)", re.IGNORECASE),
+                re.compile(r"create reminder (.+)", re.IGNORECASE),
+            ],
+            "list_reminders": [
+                re.compile(r"list reminders", re.IGNORECASE),
+                re.compile(r"what reminders", re.IGNORECASE),
+                re.compile(r"show reminders", re.IGNORECASE),
+                re.compile(r"my reminders", re.IGNORECASE),
+            ],
+            "activate_scene": [
+                re.compile(r"activate (.+)", re.IGNORECASE),
+                re.compile(r"turn on (.+) scene", re.IGNORECASE),
+                re.compile(r"set (.+) scene", re.IGNORECASE),
+                re.compile(r"movie night", re.IGNORECASE),
+                re.compile(r"bedtime", re.IGNORECASE),
+                re.compile(r"away mode", re.IGNORECASE),
+            ],
+            "play_music": [
+                re.compile(r"play (.+)", re.IGNORECASE),
+                re.compile(r"play music", re.IGNORECASE),
+                re.compile(r"play song", re.IGNORECASE),
+            ],
+            "pause_music": [
+                re.compile(r"pause", re.IGNORECASE),
+                re.compile(r"pause music", re.IGNORECASE),
+            ],
+            "stop_music": [
+                re.compile(r"stop", re.IGNORECASE),
+                re.compile(r"stop music", re.IGNORECASE),
+            ],
+            "volume": [
+                re.compile(r"volume (.+)", re.IGNORECASE),
+                re.compile(r"turn volume (.+)", re.IGNORECASE),
+                re.compile(r"louder", re.IGNORECASE),
+                re.compile(r"quieter", re.IGNORECASE),
+            ],
+            "switch_user": [
+                re.compile(r"switch user to (.+)", re.IGNORECASE),
+                re.compile(r"change user to (.+)", re.IGNORECASE),
+                re.compile(r"login as (.+)", re.IGNORECASE),
+            ],
+            "who_am_i": [
+                re.compile(r"who am i", re.IGNORECASE),
+                re.compile(r"who is this", re.IGNORECASE),
+            ],
+            "energy_usage": [
+                re.compile(r"energy usage", re.IGNORECASE),
+                re.compile(r"power consumption", re.IGNORECASE),
+                re.compile(r"energy consumption", re.IGNORECASE),
+                re.compile(r"how much energy", re.IGNORECASE),
+            ],
+            "energy_cost": [
+                re.compile(r"energy cost", re.IGNORECASE),
+                re.compile(r"electricity cost", re.IGNORECASE),
+                re.compile(r"energy bill", re.IGNORECASE),
+            ],
+            "greeting": [
+                re.compile(r"^(hi|hello|hey|good morning|good afternoon|good evening)", re.IGNORECASE),
+                re.compile(r"^what's up", re.IGNORECASE),
+            ],
+            "goodbye": [
+                re.compile(r"^(bye|goodbye|see you|later|thanks bye)", re.IGNORECASE),
+            ],
+            "casual_chat": [
+                re.compile(r"how are you", re.IGNORECASE),
+                re.compile(r"what's up", re.IGNORECASE),
+                re.compile(r"how's it going", re.IGNORECASE),
+            ],
         }
         return patterns
     

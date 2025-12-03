@@ -40,9 +40,10 @@ RUN cd /tmp && \
 # Expose ports
 EXPOSE 8000 5000
 
-# Copy startup script
+# Copy startup scripts
 COPY docker/start_services.sh /app/start_services.sh
-RUN chmod +x /app/start_services.sh
+COPY docker/setup_terminal_user.sh /app/docker/setup_terminal_user.sh
+RUN chmod +x /app/start_services.sh /app/docker/setup_terminal_user.sh
 
 # Run both services
 CMD ["/app/start_services.sh"]

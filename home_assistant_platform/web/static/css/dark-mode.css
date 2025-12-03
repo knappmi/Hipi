@@ -1,0 +1,59 @@
+/* Dark mode theme */
+
+[data-theme="dark"] {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2d2d2d;
+    --bg-tertiary: #3d3d3d;
+    --text-primary: #e0e0e0;
+    --text-secondary: #b0b0b0;
+    --border-color: #404040;
+    --shadow: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .navbar {
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .dashboard-section {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .btn-primary {
+    background-color: #4CAF50;
+    color: white;
+}
+
+[data-theme="dark"] .btn-primary:hover {
+    background-color: #45a049;
+}
+
+[data-theme="dark"] .toast {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .docs-content {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .docs-content code {
+    background-color: var(--bg-tertiary);
+    color: #4CAF50;
+}
+
+[data-theme="dark"] .docs-content pre {
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+}
+

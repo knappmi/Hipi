@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}Terminal - Home Assistant Platform{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
+<style>
+    .terminal-container {
+        height: calc(100vh - 200px);
+        min-height: 500px;
+        margin: 2rem auto;
+        max-width: 1400px;
+        padding: 0 2rem;
+    }
+    
+    .terminal-header {
+        background: #2c3e50;
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px 8px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .terminal-header h2 {
+        margin: 0;
+        font-size: 1.2rem;
+    }
+    
+    .terminal-controls {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .terminal-controls button {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background 0.2s;
+    }
+    
+    .terminal-controls button:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .terminal-controls button.danger {
+        background: rgba(244, 67, 54, 0.8);
+    }
+    
+    .terminal-controls button.danger:hover {
+        background: rgba(244, 67, 54, 1);
+    }
+    
+    #terminal {
+        background: #1e1e1e;
+        padding: 1rem;
+        border-radius: 0 0 8px 8px;
+        height: calc(100% - 60px);
+    }
+    
+    .terminal-warning {
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        border-radius: 4px;
+        padding: 1rem;
+        margin: 1rem 2rem;
+        max-width: 1400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .terminal-warning h3 {
+        margin-top: 0;
+        color: #856404;
+    }
+    
+    .terminal-warning p {
+        margin-bottom: 0.5rem;
+        color: #856404;
+    }
+    
+    .terminal-info {
+        background: #d1ecf1;
+        border: 1px solid #bee5eb;
+        border-radius: 4px;
+        padding: 1rem;
+        margin: 1rem 2rem;
+        max-width: 1400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .terminal-info h3 {
+        margin-top: 0;
+        color: #0c5460;
+    }
+    
+    .terminal-info code {
+        background: #f8f9fa;
+        padding: 0.2rem 0.4rem;
+        border-radius: 3px;
+        font-family: monospace;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="terminal-warning">
+    <h3>🔒 Security Notice</h3>
+    <p><strong>Terminal runs as restricted user with limited permissions.</strong></p>
+    <p>Security features:</p>
+    <ul>
+        <li>Non-root user execution</li>
+        <li>Restricted PATH</li>
+        <li>Limited file permissions</li>
+        <li>No sudo access</li>
+        <li>Isolated home directory</li>
+    </ul>
+    <p>Some system commands may not be available due to security restrictions.</p>
+</div>
+
+<div class="terminal-info">
+    <h3>💡 Terminal Tips</h3>
+    <p>Available commands:</p>
+    <ul>
+        <li><code>hap</code> - Platform CLI tool</li>
+        <li><code>help</code> - Show help</li>
+        <li><code>exit</code> - Close terminal session</li>
+    </ul>
+    <p>Use <code>Ctrl+C</code> to interrupt running commands.</p>
+</div>
+
+<div class="terminal-container">
+    <div class="terminal-header">
+        <h2>🖥️ Platform Terminal</h2>
+        <div class="terminal-controls">
+            <button onclick="clearTerminal()">Clear</button>
+            <button onclick="reconnectTerminal()">Reconnect</button>
+            <button class="danger" onclick="closeTerminal()">Close</button>
+        </div>
+    </div>
+    <div id="terminal"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script src="{{ url_for('static', filename='js/terminal.js') }}"></script>
+<script>
+let terminal = null;
+
+function initTerminal() {
+    terminal = new WebTerminal('terminal', '/ws/terminal');
+    
+    // Auto-resize terminal
+    const fitAddon = new FitAddon.FitAddon();
+    terminal.term.loadAddon(fitAddon);
+    
+    // Fit terminal to container
+    fitAddon.fit();
+    
+    // Handle window resize
+    window.addEventListener('resize', () => {
+        fitAddon.fit();
+        if (terminal) {
+            terminal.resize(terminal.term.cols, terminal.term.rows);
+        }
+    });
+}
+
+function clearTerminal() {
+    if (terminal && terminal.term) {
+        terminal.term.clear();
+        terminal.writePrompt();
+    }
+}
+
+function reconnectTerminal() {
+    if (terminal) {
+        terminal.destroy();
+        setTimeout(() => {
+            initTerminal();
+        }, 500);
+    }
+}
+
+function closeTerminal() {
+    if (confirm('Are you sure you want to close the terminal?')) {
+        if (terminal) {
+            terminal.destroy();
+        }
+        window.location.href = '/';
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initTerminal();
+});
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', function() {
+    if (terminal) {
+        terminal.destroy();
+    }
+});
+</script>
+{% endblock %}
+

@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - Home Assistant Platform{% endblock %}
+
+{% block extra_head %}
+<style>
+    .onboarding-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+    }
+    
+    .onboarding-step {
+        background: white;
+        border-radius: 8px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        display: none;
+    }
+    
+    .onboarding-step.active {
+        display: block;
+    }
+    
+    .onboarding-step h2 {
+        margin-bottom: 1rem;
+        color: #2c3e50;
+    }
+    
+    .onboarding-step p {
+        color: #666;
+        margin-bottom: 1.5rem;
+    }
+    
+    .onboarding-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+    }
+    
+    .onboarding-progress {
+        margin-bottom: 2rem;
+    }
+    
+    .progress-bar {
+        height: 4px;
+        background: #e0e0e0;
+        border-radius: 2px;
+        overflow: hidden;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: #4CAF50;
+        transition: width 0.3s ease;
+    }
+    
+    .step-indicator {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+    
+    .step-dot {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #e0e0e0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #999;
+        font-weight: bold;
+    }
+    
+    .step-dot.completed {
+        background: #4CAF50;
+        color: white;
+    }
+    
+    .step-dot.active {
+        background: #2196F3;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="onboarding-container">
+    <h1>Welcome to Home Assistant Platform!</h1>
+    <p>Let's get you set up in just a few steps.</p>
+    
+    <div class="onboarding-progress">
+        <div class="step-indicator" id="step-indicator"></div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+        </div>
+    </div>
+    
+    <!-- Step 1: Welcome -->
+    <div class="onboarding-step active" id="step-welcome">
+        <h2>Welcome! 👋</h2>
+        <p>Welcome to your new smart home assistant. This quick setup will help you get started.</p>
+        <p>We'll help you:</p>
+        <ul>
+            <li>Discover and add your smart devices</li>
+            <li>Set up voice commands</li>
+            <li>Create your first scene</li>
+        </ul>
+        <div class="onboarding-actions">
+            <button class="btn btn-secondary" onclick="skipOnboarding()">Skip Setup</button>
+            <button class="btn btn-primary" onclick="nextStep()">Get Started</button>
+        </div>
+    </div>
+    
+    <!-- Step 2: Device Discovery -->
+    <div class="onboarding-step" id="step-device_discovery">
+        <h2>Discover Devices 🔍</h2>
+        <p>Let's find your smart devices on the network.</p>
+        <button class="btn btn-primary" onclick="discoverDevices()">Discover Devices</button>
+        <div id="discovery-results" style="margin-top: 1rem;"></div>
+        <div class="onboarding-actions">
+            <button class="btn btn-secondary" onclick="previousStep()">Back</button>
+            <button class="btn btn-primary" onclick="nextStep()">Continue</button>
+        </div>
+    </div>
+    
+    <!-- Step 3: Voice Setup -->
+    <div class="onboarding-step" id="step-voice_setup">
+        <h2>Voice Setup 🎤</h2>
+        <p>Set up voice commands so you can control your home hands-free.</p>
+        <p>You can customize this later in settings.</p>
+        <div class="onboarding-actions">
+            <button class="btn btn-secondary" onclick="previousStep()">Back</button>
+            <button class="btn btn-primary" onclick="nextStep()">Continue</button>
+        </div>
+    </div>
+    
+    <!-- Step 4: First Scene -->
+    <div class="onboarding-step" id="step-first_scene">
+        <h2>Create Your First Scene 🎬</h2>
+        <p>Scenes let you control multiple devices at once. Let's create a "Movie Night" scene.</p>
+        <button class="btn btn-primary" onclick="createMovieNightScene()">Create Movie Night Scene</button>
+        <div id="scene-result" style="margin-top: 1rem;"></div>
+        <div class="onboarding-actions">
+            <button class="btn btn-secondary" onclick="previousStep()">Back</button>
+            <button class="btn btn-primary" onclick="nextStep()">Continue</button>
+        </div>
+    </div>
+    
+    <!-- Step 5: Complete -->
+    <div class="onboarding-step" id="step-complete">
+        <h2>You're All Set! 🎉</h2>
+        <p>Congratulations! Your smart home assistant is ready to use.</p>
+        <p>You can now:</p>
+        <ul>
+            <li>Control devices via voice or the web interface</li>
+            <li>Create more scenes and automations</li>
+            <li>Explore advanced features</li>
+        </ul>
+        <div class="onboarding-actions">
+            <button class="btn btn-primary" onclick="completeOnboarding()">Go to Dashboard</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const steps = ['welcome', 'device_discovery', 'voice_setup', 'first_scene', 'complete'];
+let currentStep = 0;
+
+function updateProgress() {
+    const progress = ((currentStep + 1) / steps.length) * 100;
+    document.getElementById('progress-fill').style.width = progress + '%';
+    
+    // Update step indicators
+    const indicator = document.getElementById('step-indicator');
+    indicator.innerHTML = steps.map((step, index) => {
+        let className = 'step-dot';
+        if (index < currentStep) className += ' completed';
+        else if (index === currentStep) className += ' active';
+        return `<div class="${className}">${index + 1}</div>`;
+    }).join('');
+}
+
+function showStep(stepIndex) {
+    steps.forEach((step, index) => {
+        const element = document.getElementById(`step-${step}`);
+        if (index === stepIndex) {
+            element.classList.add('active');
+        } else {
+            element.classList.remove('active');
+        }
+    });
+    currentStep = stepIndex;
+    updateProgress();
+}
+
+function nextStep() {
+    if (currentStep < steps.length - 1) {
+        showStep(currentStep + 1);
+    }
+}
+
+function previousStep() {
+    if (currentStep > 0) {
+        showStep(currentStep - 1);
+    }
+}
+
+async function discoverDevices() {
+    const btn = event.target;
+    showLoading(btn);
+    
+    try {
+        const result = await apiCall('/api/v1/devices/discover', {
+            method: 'POST'
+        });
+        document.getElementById('discovery-results').innerHTML = 
+            `<p class="success">Found ${result.discovered || 0} devices!</p>`;
+        showSuccess(`Found ${result.discovered || 0} devices`);
+    } catch (error) {
+        showError('Device discovery failed');
+    } finally {
+        hideLoading(btn);
+    }
+}
+
+async function createMovieNightScene() {
+    const btn = event.target;
+    showLoading(btn);
+    
+    try {
+        const result = await apiCall('/api/v1/scenes/scenes', {
+            method: 'POST',
+            body: JSON.stringify({
+                name: 'Movie Night',
+                description: 'Dim lights for movie watching',
+                device_states: []
+            })
+        });
+        document.getElementById('scene-result').innerHTML = 
+            `<p class="success">Scene created successfully!</p>`;
+        showSuccess('Movie Night scene created');
+    } catch (error) {
+        showError('Failed to create scene');
+    } finally {
+        hideLoading(btn);
+    }
+}
+
+function skipOnboarding() {
+    if (confirm('Skip onboarding? You can always access it later from settings.')) {
+        window.location.href = '/';
+    }
+}
+
+async function completeOnboarding() {
+    try {
+        await apiCall('/api/v1/onboarding/complete-step', {
+            method: 'POST',
+            body: JSON.stringify({
+                step_id: 'complete',
+                completed: true
+            })
+        });
+        window.location.href = '/';
+    } catch (error) {
+        window.location.href = '/';
+    }
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    updateProgress();
+});
+</script>
+{% endblock %}
+

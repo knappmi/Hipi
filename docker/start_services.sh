@@ -10,6 +10,12 @@ if [ ! -d "/app/data/vosk_models/vosk-model-small-en-us-0.15" ] && [ -d "/app/vo
     chmod -R 755 /app/data/vosk_models
 fi
 
+# Setup restricted terminal user
+if [ -f "/app/docker/setup_terminal_user.sh" ]; then
+    echo "Setting up terminal user..."
+    bash /app/docker/setup_terminal_user.sh
+fi
+
 # Function to handle shutdown
 cleanup() {
     echo "Shutting down services..."

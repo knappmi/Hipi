@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Home Assistant Platform{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h2>Dashboard</h2>
+        <div class="dashboard-actions">
+            <button class="btn btn-secondary" onclick="refreshDashboard()">
+                <span class="refresh-icon">🔄</span> Refresh
+            </button>
+        </div>
+    </div>
+    
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>System Status</h3>
+            <p class="stat-value" id="system-status">
+                <span class="loading"></span> Loading...
+            </p>
+        </div>
+        <div class="stat-card">
+            <h3>Devices</h3>
+            <p class="stat-value" id="device-count">
+                <span class="loading"></span>
+            </p>
+        </div>
+        <div class="stat-card">
+            <h3>Scenes</h3>
+            <p class="stat-value" id="scene-count">
+                <span class="loading"></span>
+            </p>
+        </div>
+        <div class="stat-card">
+            <h3>Automations</h3>
+            <p class="stat-value" id="automation-count">
+                <span class="loading"></span>
+            </p>
+        </div>
+    </div>
+    
+    <div class="dashboard-section">
+        <h3>Quick Actions</h3>
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="controlDevice('light_001', 'turn_on')">
+                Turn On Lights
+            </button>
+            <button class="btn btn-primary" onclick="activateScene(1)">
+                Activate Scene
+            </button>
+            <button class="btn btn-secondary" onclick="discoverDevices()">
+                Discover Devices
+            </button>
+        </div>
+    </div>
+    
+    <div class="dashboard-section">
+        <h3>Recent Activity</h3>
+        <div id="activity-log" class="activity-log">
+            <p class="skeleton skeleton-text"></p>
+            <p class="skeleton skeleton-text"></p>
+            <p class="skeleton skeleton-text"></p>
+        </div>
+    </div>
+</div>
+
+<script>
+// Enhanced dashboard functionality
+async function refreshDashboard() {
+    const btn = event.target.closest('button');
+    showLoading(btn);
+    
+    try {
+        await loadDashboardData();
+        showSuccess('Dashboard refreshed');
+    } catch (error) {
+        showError('Failed to refresh dashboard');
+    } finally {
+        hideLoading(btn);
+    }
+}
+
+async function loadDashboardData() {
+    // Load system status
+    try {
+        const status = await apiCall('/api/status');
+        document.getElementById('system-status').textContent = status.status || 'Unknown';
+    } catch (error) {
+        document.getElementById('system-status').textContent = 'Error';
+    }
+    
+    // Load device count
+    try {
+        const devices = await apiCall('/api/v1/devices');
+        document.getElementById('device-count').textContent = devices.count || 0;
+    } catch (error) {
+        document.getElementById('device-count').textContent = 'Error';
+    }
+    
+    // Load scene count
+    try {
+        const scenes = await apiCall('/api/v1/scenes/scenes');
+        document.getElementById('scene-count').textContent = scenes.scenes?.length || 0;
+    } catch (error) {
+        document.getElementById('scene-count').textContent = 'Error';
+    }
+    
+    // Load automation count
+    try {
+        const automations = await apiCall('/api/v1/automation/automations');
+        document.getElementById('automation-count').textContent = automations.length || 0;
+    } catch (error) {
+        document.getElementById('automation-count').textContent = 'Error';
+    }
+    
+    // Load activity log
+    try {
+        const activity = await apiCall('/api/v1/telemetry/activity');
+        const activityLog = document.getElementById('activity-log');
+        if (activity && activity.length > 0) {
+            activityLog.innerHTML = activity.slice(0, 5).map(item => 
+                `<p>${item.message || item}</p>`
+            ).join('');
+        } else {
+            activityLog.innerHTML = '<p>No recent activity</p>';
+        }
+    } catch (error) {
+        document.getElementById('activity-log').innerHTML = '<p>Unable to load activity</p>';
+    }
+}
+
+async function controlDevice(deviceId, action) {
+    const btn = event.target.closest('button');
+    showLoading(btn);
+    
+    try {
+        await apiCall(`/api/v1/devices/${deviceId}/control`, {
+            method: 'POST',
+            body: JSON.stringify({ action })
+        });
+        showSuccess(`Device ${action} successful`);
+        await loadDashboardData();
+    } catch (error) {
+        showError(`Failed to ${action} device`);
+    } finally {
+        hideLoading(btn);
+    }
+}
+
+async function activateScene(sceneId) {
+    const btn = event.target.closest('button');
+    showLoading(btn);
+    
+    try {
+        await apiCall(`/api/v1/scenes/scenes/${sceneId}/activate`, {
+            method: 'POST'
+        });
+        showSuccess('Scene activated');
+    } catch (error) {
+        showError('Failed to activate scene');
+    } finally {
+        hideLoading(btn);
+    }
+}
+
+async function discoverDevices() {
+    const btn = event.target.closest('button');
+    showLoading(btn);
+    
+    try {
+        const result = await apiCall('/api/v1/devices/discover', {
+            method: 'POST'
+        });
+        showSuccess(`Found ${result.discovered || 0} devices`);
+        await loadDashboardData();
+    } catch (error) {
+        showError('Device discovery failed');
+    } finally {
+        hideLoading(btn);
+    }
+}
+
+// Load dashboard on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadDashboardData();
+    
+    // Auto-refresh every 30 seconds
+    setInterval(loadDashboardData, 30000);
+});
+</script>
+{% endblock %}
+

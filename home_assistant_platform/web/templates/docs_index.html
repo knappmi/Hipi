@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Documentation - Home Assistant Platform{% endblock %}
+
+{% block extra_head %}
+<style>
+    .docs-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .docs-header {
+        margin-bottom: 2rem;
+    }
+    
+    .docs-header h1 {
+        font-size: 2.5rem;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .docs-header p {
+        color: #666;
+        font-size: 1.1rem;
+    }
+    
+    .docs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .doc-card {
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+    
+    .doc-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+        border-color: #4CAF50;
+    }
+    
+    .doc-card h3 {
+        margin: 0 0 0.5rem 0;
+        color: #333;
+        font-size: 1.3rem;
+    }
+    
+    .doc-card p {
+        margin: 0;
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .doc-category {
+        margin-top: 3rem;
+    }
+    
+    .doc-category h2 {
+        font-size: 1.8rem;
+        color: #333;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #4CAF50;
+    }
+    
+    .quick-links {
+        background: #f5f5f5;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .quick-links h3 {
+        margin-top: 0;
+        color: #333;
+    }
+    
+    .quick-links ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .quick-links li {
+        margin: 0.5rem 0;
+    }
+    
+    .quick-links a {
+        color: #4CAF50;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .quick-links a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="docs-container">
+    <div class="docs-header">
+        <h1>📚 Documentation</h1>
+        <p>Complete guide to using the Home Assistant Platform</p>
+    </div>
+    
+    <div class="quick-links">
+        <h3>Quick Links</h3>
+        <ul>
+            <li><a href="/docs/QUICK_REFERENCE.md">Quick Reference</a> - Voice commands and API quick reference</li>
+            <li><a href="/docs/README.md">Documentation Index</a> - Complete documentation index</li>
+        </ul>
+    </div>
+    
+    <div class="doc-category">
+        <h2>Feature Documentation</h2>
+        <div class="docs-grid">
+            {% for doc in docs_files %}
+            <a href="{{ url_for('docs_viewer', doc_name=doc.filename) }}" class="doc-card">
+                <h3>{{ doc.name }}</h3>
+                <p>View documentation for {{ doc.name }}</p>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

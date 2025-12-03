@@ -1,0 +1,98 @@
+[tool.poetry]
+name = "hipi"
+version = "1.0.0"
+description = "Home Assistant Platform - A voice-enabled home automation system"
+authors = ["knappmi <knappmi@users.noreply.github.com>"]
+readme = "README.md"
+packages = [{include = "home_assistant_platform"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+# Core Framework
+fastapi = "0.104.1"
+uvicorn = {extras = ["standard"], version = "0.24.0"}
+flask = "3.0.0"
+flask-cors = "4.0.0"
+
+# Voice Processing
+vosk = "0.3.45"
+pyttsx3 = "2.90"
+openai = "0.28.1"
+pyaudio = "0.2.14"
+
+# Docker Management
+docker = "6.1.3"
+
+# Database
+sqlalchemy = "2.0.23"
+psycopg2-binary = "2.9.9"
+
+# MQTT
+paho-mqtt = "1.6.1"
+
+# Authentication & Security
+python-jose = {extras = ["cryptography"], version = "3.3.0"}
+passlib = {extras = ["bcrypt"], version = "1.7.4"}
+python-multipart = "0.0.6"
+
+# Configuration
+python-dotenv = "1.0.0"
+pydantic = "2.5.0"
+pydantic-settings = "2.1.0"
+
+# Utilities
+requests = "2.31.0"
+aiohttp = "3.9.1"
+pyyaml = "6.0.1"
+httpx = ">=0.27.0"
+streamlit = ">=1.28.0"
+markdown = ">=3.4.0"
+Pygments = ">=2.15.0"
+click = ">=8.1.0"
+jinja2 = ">=3.1.0"
+flask-socketio = ">=5.3.0"
+python-socketio = ">=5.10.0"
+ddgs = ">=1.0.0"
+
+# Note: RPi.GPIO==0.7.1 is hardware-specific and should be installed separately on Raspberry Pi:
+# pip install RPi.GPIO==0.7.1
+# Or: poetry run pip install RPi.GPIO==0.7.1
+
+[tool.poetry.group.dev.dependencies]
+pytest = "7.4.3"
+pytest-asyncio = "0.21.1"
+black = "^23.0.0"
+ruff = "^0.1.0"
+mypy = "^1.0.0"
+
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+hipi = "home_assistant_platform.core.main:main"
+hap = "home_assistant_platform.cli.main:cli"
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+include = '\.pyi?$'
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
+
